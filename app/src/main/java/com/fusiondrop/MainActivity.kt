@@ -32,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.fusiondrop.connection.WifiDirectConnection
 import com.fusiondrop.transfer.*
 import com.google.zxing.BarcodeFormat
@@ -47,7 +48,7 @@ class MainActivity : ComponentActivity() {
  private val picker=registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris -> if(uris.isNotEmpty()) selectedUris=uris }
  private var selectedUris by mutableStateOf<List<Uri>>(emptyList())
  private val permissionLauncher=registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result -> if(result.values.any{!it}) Toast.makeText(this,"Allow the requested permission in Settings to continue.",Toast.LENGTH_LONG).show() }
- override fun onCreate(savedInstanceState:Bundle?) { androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen(this); super.onCreate(savedInstanceState); setContent { FusionDropApp(selectedUris, onPick={ picker.launch(arrayOf("*/*")) }, onClear={selectedUris=emptyList()}, onRequestPermissions={ requestPermissionsFor(it) }) } }
+ override fun onCreate(savedInstanceState:Bundle?) { installSplashScreen(); super.onCreate(savedInstanceState); setContent { FusionDropApp(selectedUris, onPick={ picker.launch(arrayOf("*/*")) }, onClear={selectedUris=emptyList()}, onRequestPermissions={ requestPermissionsFor(it) }) } }
  private fun requestPermissionsFor(mode:String) { val permissions= mutableListOf<String>(); if(Build.VERSION.SDK_INT>=33) { permissions+=Manifest.permission.NEARBY_WIFI_DEVICES; permissions+=Manifest.permission.POST_NOTIFICATIONS } else { permissions+=Manifest.permission.ACCESS_FINE_LOCATION; if(mode=="receive" && Build.VERSION.SDK_INT<=28) permissions+=Manifest.permission.WRITE_EXTERNAL_STORAGE }; val missing=permissions.filter { ContextCompat.checkSelfPermission(this,it)!=android.content.pm.PackageManager.PERMISSION_GRANTED }; if(missing.isNotEmpty()) { Toast.makeText(this,"FusionDrop needs permission to connect and transfer files.",Toast.LENGTH_LONG).show(); permissionLauncher.launch(missing.toTypedArray()) } }
 }
 
@@ -87,7 +88,7 @@ private fun prepareOutgoingFiles(context:Context, uris:List<Uri>):Pair<List<Outg
   val name=queryName(context,uri); var size=context.contentResolver.query(uri,arrayOf(android.provider.OpenableColumns.SIZE),null,null,null)?.use { c -> if(c.moveToFirst()) c.getLong(0).takeIf { !c.isNull(0) && it>=0 } else null }
   if(size==null) size=context.contentResolver.openAssetFileDescriptor(uri,"r")?.use { it.length.takeIf { n -> n>=0 } }
   if(size==null) { val temp=java.io.File.createTempFile("fusiondrop-", ".stream", context.cacheDir); context.contentResolver.openInputStream(uri)?.use { input -> temp.outputStream().use { output -> input.copyTo(output,1024*1024) } } ?: throw java.io.IOException("Cannot read $name"); staged+=temp; OutgoingFile(Uri.fromFile(temp),name,temp.length()) } else OutgoingFile(uri,name,size)
- }; result to staged
+ }; return result to staged
 }
 
 private fun querySize(c:Context,u:Uri):String { val size=c.contentResolver.query(u,arrayOf(android.provider.OpenableColumns.SIZE),null,null,null)?.use { cur -> if(cur.moveToFirst() && !cur.isNull(0)) cur.getLong(0) else null }; return size?.let(::formatBytes) ?: "Size unknown" }
