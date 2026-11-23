@@ -23,6 +23,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -49,6 +50,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FolderOpen
@@ -72,6 +74,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -88,12 +91,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -123,6 +128,14 @@ private val Panel = Color(0xFF111C2D)
 private val PanelRaised = Color(0xFF17243A)
 private val PrimaryText = Color(0xFFF3F7FF)
 private val MutedText = Color(0xFF91A3BC)
+private val Hairline = Color(0xFF1F2E45)
+private val OutlineColor = Color(0xFF2B3D56)
+private val Success = Color(0xFF35D49A)
+private val ButtonShape = RoundedCornerShape(14.dp)
+private val OutlineBorder = BorderStroke(1.dp, OutlineColor)
+
+@Composable
+private fun outlinedColors() = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryText)
 
 class MainActivity : ComponentActivity() {
     private var selectedUris by mutableStateOf<List<Uri>>(emptyList())
@@ -217,6 +230,12 @@ private fun FusionDropApp(
 
     MaterialTheme(colorScheme = scheme) {
         Surface(Modifier.fillMaxSize(), color = AppBackground) {
+            Box(Modifier.fillMaxSize()) {
+            Box(
+                Modifier.fillMaxWidth().height(340.dp).background(
+                    Brush.verticalGradient(listOf(Color(0xFF10223D), AppBackground))
+                )
+            )
             Column(
                 Modifier.fillMaxSize()
                     .statusBarsPadding()
@@ -300,6 +319,7 @@ private fun FusionDropApp(
                     }
                 }
             }
+            }
         }
     }
 }
@@ -307,22 +327,29 @@ private fun FusionDropApp(
 @Composable
 private fun TopBar(page: String, onBack: () -> Unit, onSettings: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().padding(bottom = 12.dp),
+        Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (page == "home") {
-            BrandMark(Modifier.size(38.dp))
-            Spacer(Modifier.width(10.dp))
+            BrandMark(Modifier.size(40.dp))
+            Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("FusionDrop", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = PrimaryText)
-                Text("PRIVATE FILE TRANSFER", fontSize = 9.sp, letterSpacing = 1.4.sp, color = MutedText, fontWeight = FontWeight.Bold)
+                Text("FusionDrop", fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, color = PrimaryText, letterSpacing = (-0.3).sp)
+                Text("PRIVATE FILE TRANSFER", fontSize = 10.sp, letterSpacing = 1.6.sp, color = MutedText, fontWeight = FontWeight.SemiBold)
             }
         } else {
-            IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = PrimaryText) }
-            Text(pageTitle(page), Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 17.sp, color = PrimaryText)
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.size(40.dp).clip(CircleShape).background(Panel).border(1.dp, Hairline, CircleShape)
+            ) { Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = PrimaryText, modifier = Modifier.size(20.dp)) }
+            Spacer(Modifier.width(14.dp))
+            Text(pageTitle(page), Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = PrimaryText, letterSpacing = (-0.2).sp)
         }
-        IconButton(onClick = onSettings) {
-            Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MutedText)
+        IconButton(
+            onClick = onSettings,
+            modifier = Modifier.size(40.dp).clip(CircleShape).background(Panel).border(1.dp, Hairline, CircleShape)
+        ) {
+            Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MutedText, modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -346,7 +373,7 @@ private fun BrandMark(modifier: Modifier = Modifier) {
         modifier.clip(RoundedCornerShape(13.dp)).background(Brush.linearGradient(listOf(Blue, Cyan))),
         contentAlignment = Alignment.Center
     ) {
-        Text("F", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black)
+        Text("F", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Black)
     }
 }
 
@@ -354,10 +381,10 @@ private fun BrandMark(modifier: Modifier = Modifier) {
 private fun HomeScreen(onSend: () -> Unit, onReceive: () -> Unit, onLinkShare: () -> Unit) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Box(
-            Modifier.fillMaxWidth().aspectRatio(1.92f).clip(RoundedCornerShape(25.dp))
+            Modifier.fillMaxWidth().aspectRatio(1.92f).clip(RoundedCornerShape(22.dp)).border(1.dp, Hairline, RoundedCornerShape(22.dp))
         ) {
             Image(
                 painter = painterResource(R.drawable.fusiondrop_logo),
@@ -367,21 +394,21 @@ private fun HomeScreen(onSend: () -> Unit, onReceive: () -> Unit, onLinkShare: (
             )
             Box(
                 Modifier.fillMaxSize().background(
-                    Brush.verticalGradient(listOf(Color.Transparent, Color(0xCC060B14)))
+                    Brush.verticalGradient(listOf(Color.Transparent, Color(0x33060B14), Color(0xE6060B14)))
                 )
             )
             Column(Modifier.align(Alignment.BottomStart).padding(18.dp)) {
-                Text("FAST · PRIVATE · ORIGINAL", color = Color(0xFF9CECF5), fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp)
-                Text("Move files. Keep quality.", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                Text("FAST · PRIVATE · ORIGINAL", color = Color(0xFF9CECF5), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.6.sp)
+                Text("Move files. Keep quality.", color = Color.White, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.3).sp)
             }
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Your files, your way.", color = PrimaryText, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.7).sp)
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top = 8.dp)) {
+            Text("Your files, your way.", color = PrimaryText, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.5).sp)
             Text("Choose how you want to share today.", color = MutedText, fontSize = 14.sp)
         }
 
-        Text("TRANSFER MODES", color = MutedText, fontSize = 10.sp, letterSpacing = 1.8.sp, fontWeight = FontWeight.ExtraBold)
+        Text("TRANSFER MODES", color = MutedText, fontSize = 11.sp, letterSpacing = 1.8.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
         TransferModeCard(
             title = "Send to another phone",
             subtitle = "Direct phone-to-phone transfer",
@@ -405,10 +432,10 @@ private fun HomeScreen(onSend: () -> Unit, onReceive: () -> Unit, onLinkShare: (
             onClick = onLinkShare
         )
 
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(top = 2.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(top = 6.dp)) {
             Icon(Icons.Default.Security, contentDescription = null, tint = Color(0xFF7C93B2), modifier = Modifier.size(14.dp))
             Spacer(Modifier.width(6.dp))
-            Text("No cloud upload · No file compression", color = MutedText, fontSize = 11.sp)
+            Text("No cloud upload · No file compression", color = MutedText, fontSize = 12.sp)
         }
     }
 }
@@ -429,29 +456,34 @@ private fun TransferModeCard(
         modifier = Modifier.fillMaxWidth()
             .graphicsLayer { scaleX = scale; scaleY = scale }
             .clickable(interactionSource = interaction, indication = null, onClick = onClick),
-        shape = RoundedCornerShape(21.dp),
-        color = if (featured) Color(0xFF142A3D) else Panel,
-        border = BorderStroke(1.dp, if (featured) Color(0xFF277C91) else Color(0xFF22324A))
+        shape = RoundedCornerShape(18.dp),
+        color = if (featured) Color(0xFF0F2438) else Panel,
+        border = BorderStroke(1.dp, if (featured) Cyan.copy(alpha = 0.40f) else Hairline)
     ) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                Modifier.size(49.dp).clip(RoundedCornerShape(16.dp)).background(Brush.linearGradient(listOf(accent, accent.copy(alpha = 0.55f)))),
+                Modifier.size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(accent.copy(alpha = 0.14f))
+                    .border(1.dp, accent.copy(alpha = 0.30f), RoundedCornerShape(14.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(23.dp))
+                Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(23.dp))
             }
-            Spacer(Modifier.width(13.dp))
+            Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(title, color = PrimaryText, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     if (featured) {
-                        Spacer(Modifier.width(7.dp))
-                        Text("NEW", color = Color(0xFF7DE8EF), fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                        Spacer(Modifier.width(8.dp))
+                        Surface(shape = CircleShape, color = Cyan.copy(alpha = 0.16f)) {
+                            Text("NEW", Modifier.padding(horizontal = 7.dp, vertical = 2.dp), color = Color(0xFF7DE8EF), fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                        }
                     }
                 }
                 Text(subtitle, color = MutedText, fontSize = 12.sp)
             }
-            Icon(Icons.Default.ArrowForward, contentDescription = null, tint = if (featured) Cyan else MutedText, modifier = Modifier.size(19.dp))
+            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = if (featured) Cyan else MutedText, modifier = Modifier.size(22.dp))
         }
     }
 }
@@ -462,7 +494,7 @@ private fun SelectFilesScreen(files: List<Uri>, onPick: () -> Unit, onClear: () 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
         ScreenIntro("Send files directly", "Choose photos, videos, documents or any other file. Originals stay unchanged.")
         files.forEach { uri -> FileRow(name = queryName(context, uri), size = querySize(context, uri)) }
-        OutlinedButton(onClick = onPick, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp)) {
+        OutlinedButton(onClick = onPick, modifier = Modifier.fillMaxWidth().height(52.dp), shape = ButtonShape, border = OutlineBorder, colors = outlinedColors()) {
             Text(if (files.isEmpty()) "Choose files" else "Add more files")
         }
         if (files.isNotEmpty()) {
@@ -479,12 +511,12 @@ private fun QrReadyScreen(qr: String, onCancel: () -> Unit) {
         ScreenIntro("Ready to connect", "Open FusionDrop on the other phone, tap Receive and scan this code.")
         val bitmap = remember(qr) { qrBitmap(qr) }
         if (bitmap != null) {
-            Surface(shape = RoundedCornerShape(25.dp), color = Color.White, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+            Surface(shape = RoundedCornerShape(24.dp), color = Color.White, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
                 Image(bitmap.asImageBitmap(), contentDescription = "Connection QR code", modifier = Modifier.padding(18.dp).fillMaxWidth().aspectRatio(1f))
             }
         }
         InfoPanel("Keep this screen open until the other phone connects. Both devices should have Wi-Fi enabled.")
-        OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp)) { Text("Cancel transfer") }
+        OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth().height(52.dp), shape = ButtonShape, border = OutlineBorder, colors = outlinedColors()) { Text("Cancel transfer") }
     }
 }
 
@@ -501,19 +533,22 @@ private fun ScanScreen(onCode: (String) -> Unit) {
 private fun TransferScreen(progress: TransferProgress?, speed: Double, onCancel: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(top = 14.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         ScreenIntro("Transferring your files", progress?.fileName ?: "Preparing the connection…")
-        Card(colors = CardDefaults.cardColors(containerColor = Panel), shape = RoundedCornerShape(23.dp)) {
-            Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-                Text("TRANSFER SPEED", color = MutedText, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.3.sp)
-                Text("${String.format("%.1f", speed / 1024 / 1024)} MB/s", color = PrimaryText, fontSize = 34.sp, fontWeight = FontWeight.ExtraBold)
+        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Panel), shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, Hairline)) {
+            Column(Modifier.fillMaxWidth().padding(22.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Text("TRANSFER SPEED", color = MutedText, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
+                Text("${String.format("%.1f", speed / 1024 / 1024)} MB/s", color = PrimaryText, fontSize = 38.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-1).sp)
                 LinearProgressIndicator(
                     progress = { progress?.let { if (it.totalSize > 0) it.totalBytes.toFloat() / it.totalSize else 0f } ?: 0f },
-                    modifier = Modifier.fillMaxWidth().height(9.dp).clip(CircleShape)
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+                    color = Cyan,
+                    trackColor = PanelRaised,
+                    drawStopIndicator = {}
                 )
-                Text("${progress?.totalBytes?.let(::formatBytes) ?: "0 B"} / ${progress?.totalSize?.let(::formatBytes) ?: "—"}", color = MutedText, fontSize = 12.sp)
+                Text("${progress?.totalBytes?.let(::formatBytes) ?: "0 B"} / ${progress?.totalSize?.let(::formatBytes) ?: "—"}", color = MutedText, fontSize = 13.sp)
             }
         }
         Spacer(Modifier.weight(1f))
-        OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp)) { Text("Close transfer screen") }
+        OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth().height(52.dp), shape = ButtonShape, border = OutlineBorder, colors = outlinedColors()) { Text("Close transfer screen") }
     }
 }
 
@@ -531,17 +566,23 @@ private fun LinkShareScreen(
         ScreenIntro("One link. Any browser.", "Share a private link with a friend on the same Wi-Fi or your phone hotspot. They do not need the app.")
 
         if (state.isRunning) {
-            Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF102B2B)), border = BorderStroke(1.dp, Color(0xFF267767)), shape = RoundedCornerShape(22.dp)) {
+            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF0F2730)), border = BorderStroke(1.dp, Color(0xFF1F6B63)), shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.fillMaxWidth().padding(17.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(color = Color(0xFF1D684F), shape = CircleShape) {
-                            Text("LIVE", Modifier.padding(horizontal = 10.dp, vertical = 5.dp), color = Color(0xFFB6FFE0), fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                        Surface(color = Color(0xFF16503F), shape = CircleShape) {
+                            Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Box(Modifier.size(7.dp).clip(CircleShape).background(Success))
+                                Spacer(Modifier.width(6.dp))
+                                Text("LIVE", color = Color(0xFFB6FFE0), fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                            }
                         }
                         Spacer(Modifier.weight(1f))
                         Text("${state.fileCount} files", color = Color(0xFFB8D4D3), fontSize = 12.sp)
                     }
                     Text("Your share link is ready", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                    Text(state.url, color = Color(0xFF9FEAF0), fontSize = 13.sp)
+                    Surface(color = Color(0xFF0A1A21), shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, Color(0xFF1B3B44)), modifier = Modifier.fillMaxWidth()) {
+                        Text(state.url, Modifier.padding(horizontal = 12.dp, vertical = 10.dp), color = Color(0xFF9FEAF0), fontSize = 12.sp, fontFamily = FontFamily.Monospace, lineHeight = 17.sp)
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                         Button(
                             onClick = {
@@ -549,8 +590,8 @@ private fun LinkShareScreen(
                                 clipboard.setPrimaryClip(ClipData.newPlainText("FusionDrop share link", state.url))
                                 Toast.makeText(context, "Link copied", Toast.LENGTH_SHORT).show()
                             },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(13.dp),
+                            modifier = Modifier.weight(1f).height(48.dp),
+                            shape = ButtonShape,
                             colors = ButtonDefaults.buttonColors(containerColor = Blue)
                         ) {
                             Icon(Icons.Default.ContentCopy, null, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(7.dp)); Text("Copy link")
@@ -563,15 +604,17 @@ private fun LinkShareScreen(
                                 }
                                 context.startActivity(Intent.createChooser(intent, "Share FusionDrop link"))
                             },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(13.dp)
+                            modifier = Modifier.weight(1f).height(48.dp),
+                            shape = ButtonShape,
+                            border = OutlineBorder,
+                            colors = outlinedColors()
                         ) {
                             Icon(Icons.Default.Share, null, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(7.dp)); Text("Share")
                         }
                     }
                     val qr = remember(state.url) { qrBitmap(state.url) }
                     if (qr != null) {
-                        Surface(color = Color.White, shape = RoundedCornerShape(18.dp), modifier = Modifier.align(Alignment.CenterHorizontally).size(190.dp)) {
+                        Surface(color = Color.White, shape = RoundedCornerShape(16.dp), modifier = Modifier.align(Alignment.CenterHorizontally).size(196.dp)) {
                             Image(qr.asImageBitmap(), contentDescription = "Link Share QR code", modifier = Modifier.padding(10.dp))
                         }
                     }
@@ -580,17 +623,17 @@ private fun LinkShareScreen(
                         Spacer(Modifier.width(8.dp))
                         Text("${state.activeDownloads} active download(s)", color = Color(0xFFD1EBE7), fontSize = 12.sp)
                     }
-                    Text("Keep this screen or the notification active while your friend downloads. Anyone with this private link on your network can access the shared files.", color = Color(0xFF9FB8B6), fontSize = 11.sp)
+                    Text("Keep this screen or the notification active while your friend downloads. Anyone with this private link on your network can access the shared files.", color = Color(0xFF9FB8B6), fontSize = 12.sp, lineHeight = 17.sp)
                 }
             }
-            OutlinedButton(onClick = onStop, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF9A9A))) {
+            OutlinedButton(onClick = onStop, modifier = Modifier.fillMaxWidth().height(52.dp), shape = ButtonShape, border = BorderStroke(1.dp, Color(0xFF5A3038)), colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF9A9A))) {
                 Icon(Icons.Default.StopCircle, null); Spacer(Modifier.width(8.dp)); Text("Stop sharing")
             }
         } else {
-            Card(colors = CardDefaults.cardColors(containerColor = Panel), shape = RoundedCornerShape(21.dp), border = BorderStroke(1.dp, Color(0xFF243650))) {
+            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Panel), shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, Hairline)) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(42.dp).clip(RoundedCornerShape(13.dp)).background(Color(0xFF183D5B)), contentAlignment = Alignment.Center) {
+                        Box(Modifier.size(42.dp).clip(RoundedCornerShape(13.dp)).background(Cyan.copy(alpha = 0.14f)).border(1.dp, Cyan.copy(alpha = 0.28f), RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) {
                             Icon(Icons.Default.FolderOpen, null, tint = Cyan)
                         }
                         Spacer(Modifier.width(11.dp))
@@ -605,7 +648,7 @@ private fun LinkShareScreen(
                     } else {
                         Text("No files selected yet.", color = MutedText, fontSize = 13.sp)
                     }
-                    OutlinedButton(onClick = onPick, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+                    OutlinedButton(onClick = onPick, modifier = Modifier.fillMaxWidth().height(52.dp), shape = ButtonShape, border = OutlineBorder, colors = outlinedColors()) {
                         Text(if (files.isEmpty()) "Choose files" else "Change selected files")
                     }
                 }
@@ -617,7 +660,20 @@ private fun LinkShareScreen(
                 label = { Text("Welcome note for your friend") },
                 supportingText = { Text("Optional · shown at the top of their browser page") },
                 maxLines = 3,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = PrimaryText,
+                    unfocusedTextColor = PrimaryText,
+                    focusedContainerColor = Panel,
+                    unfocusedContainerColor = Panel,
+                    cursorColor = Cyan,
+                    focusedBorderColor = Cyan,
+                    unfocusedBorderColor = OutlineColor,
+                    focusedLabelColor = Cyan,
+                    unfocusedLabelColor = MutedText,
+                    focusedSupportingTextColor = MutedText,
+                    unfocusedSupportingTextColor = MutedText
+                )
             )
             if (state.isStarting) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
@@ -631,7 +687,7 @@ private fun LinkShareScreen(
             InfoPanel("Both devices must be connected to the same Wi-Fi network or your hotspot. Your phone serves the original files directly; no cloud account, upload or compression is used.")
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                 Icon(Icons.Default.Security, null, tint = Color(0xFFFFD27A), modifier = Modifier.size(16.dp))
-                Text("Use a trusted network. Anyone who receives the link can download these files until you stop sharing.", color = MutedText, fontSize = 11.sp)
+                Text("Use a trusted network. Anyone who receives the link can download these files until you stop sharing.", color = MutedText, fontSize = 12.sp, lineHeight = 17.sp)
             }
         }
     }
@@ -653,7 +709,7 @@ private fun HistoryScreen(history: List<String>) {
 private fun SettingsScreen(onHistory: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(13.dp)) {
         ScreenIntro("App preferences", "A few details about how FusionDrop handles your files.")
-        Card(colors = CardDefaults.cardColors(containerColor = Panel), shape = RoundedCornerShape(18.dp)) {
+        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Panel), shape = RoundedCornerShape(18.dp), border = BorderStroke(1.dp, Hairline)) {
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("SHA-256 verification", color = PrimaryText, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
@@ -662,14 +718,14 @@ private fun SettingsScreen(onHistory: () -> Unit) {
                 Text("The current phone-transfer protocol does not yet calculate and compare SHA-256 hashes. This switch is intentionally not presented as an active feature.", color = MutedText, fontSize = 12.sp)
             }
         }
-        Card(colors = CardDefaults.cardColors(containerColor = Panel), shape = RoundedCornerShape(18.dp)) {
+        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Panel), shape = RoundedCornerShape(18.dp), border = BorderStroke(1.dp, Hairline)) {
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("Save location", color = PrimaryText, fontWeight = FontWeight.Bold)
                 Text("Downloads / FlashDrop", color = MutedText, fontSize = 13.sp)
                 Text("Language follows the phone's system language. More Bengali translations can be added later.", color = MutedText, fontSize = 12.sp)
             }
         }
-        OutlinedButton(onClick = onHistory, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp)) {
+        OutlinedButton(onClick = onHistory, modifier = Modifier.fillMaxWidth().height(52.dp), shape = ButtonShape, border = OutlineBorder, colors = outlinedColors()) {
             Icon(Icons.Default.History, null); Spacer(Modifier.width(8.dp)); Text("Transfer history")
         }
     }
@@ -677,41 +733,47 @@ private fun SettingsScreen(onHistory: () -> Unit) {
 
 @Composable
 private fun ScreenIntro(title: String, subtitle: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)) {
-        Text(title, color = PrimaryText, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.5).sp)
-        Text(subtitle, color = MutedText, fontSize = 13.sp, lineHeight = 19.sp)
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 6.dp, bottom = 6.dp)) {
+        Text(title, color = PrimaryText, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.6).sp)
+        Text(subtitle, color = MutedText, fontSize = 14.sp, lineHeight = 20.sp)
     }
 }
 
 @Composable
 private fun FileRow(name: String, size: String) {
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(15.dp)).background(Panel).padding(13.dp),
+        Modifier.fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Panel)
+            .border(1.dp, Hairline, RoundedCornerShape(14.dp))
+            .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(Modifier.size(39.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFF1B3353)), contentAlignment = Alignment.Center) {
-            Icon(Icons.Default.InsertDriveFile, null, tint = Color(0xFF9FC6FF), modifier = Modifier.size(19.dp))
+        Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(Blue.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
+            Icon(Icons.Default.InsertDriveFile, null, tint = Color(0xFF9FC6FF), modifier = Modifier.size(20.dp))
         }
-        Spacer(Modifier.width(11.dp))
+        Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(name, color = PrimaryText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(size, color = MutedText, fontSize = 11.sp)
+            Text(name, color = PrimaryText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(size, color = MutedText, fontSize = 12.sp)
         }
-        Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF50D8A4), modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(8.dp))
+        Icon(Icons.Default.CheckCircle, null, tint = Success, modifier = Modifier.size(19.dp))
     }
 }
 
 @Composable
 private fun InfoPanel(text: String, warning: Boolean = false) {
     Surface(
-        color = if (warning) Color(0xFF3A2028) else Color(0xFF122235),
-        shape = RoundedCornerShape(15.dp),
-        border = BorderStroke(1.dp, if (warning) Color(0xFF70404B) else Color(0xFF24445E))
+        modifier = Modifier.fillMaxWidth(),
+        color = if (warning) Color(0xFF331C25) else Color(0xFF0F1D2F),
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, if (warning) Color(0xFF63404B) else Color(0xFF1F3A55))
     ) {
-        Row(Modifier.fillMaxWidth().padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.Top) {
             Icon(Icons.Default.Info, null, tint = if (warning) Color(0xFFFFA0A0) else Color(0xFF82D9E7), modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(9.dp))
-            Text(text, color = if (warning) Color(0xFFFFD3D3) else Color(0xFFB9CFE1), fontSize = 11.sp, lineHeight = 16.sp)
+            Spacer(Modifier.width(10.dp))
+            Text(text, color = if (warning) Color(0xFFFFD3D3) else Color(0xFFB4C8DB), fontSize = 12.sp, lineHeight = 18.sp)
         }
     }
 }
@@ -721,27 +783,39 @@ private fun GradientButton(text: String, icon: ImageVector, enabled: Boolean = t
     Button(
         onClick = onClick,
         enabled = enabled,
-        modifier = Modifier.fillMaxWidth().height(55.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Blue, disabledContainerColor = Color(0xFF26354B)),
+        modifier = Modifier.fillMaxWidth().height(54.dp)
+            .background(
+                if (enabled) Brush.horizontalGradient(listOf(Blue, Color(0xFF1FA6D9))) else SolidColor(Color(0xFF1B283B)),
+                RoundedCornerShape(15.dp)
+            ),
+        shape = RoundedCornerShape(15.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            contentColor = Color.White,
+            disabledContentColor = Color(0xFF6C7F99)
+        ),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 18.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, null, tint = Color.White)
-            Spacer(Modifier.width(9.dp))
-            Text(text, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            Icon(icon, null, modifier = Modifier.size(21.dp))
+            Spacer(Modifier.width(10.dp))
+            Text(text, fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.2.sp)
         }
     }
 }
 
 @Composable
 private fun CenterMessage(title: String, subtitle: String, action: (() -> Unit)? = null) {
-    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-        BrandMark(Modifier.size(64.dp))
-        Spacer(Modifier.height(18.dp))
-        Text(title, color = PrimaryText, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
-        Text(subtitle, color = MutedText, modifier = Modifier.padding(12.dp), textAlign = TextAlign.Center, fontSize = 13.sp)
-        if (action != null) OutlinedButton(onClick = action, shape = RoundedCornerShape(14.dp)) { Text("Back to home") }
+    Column(Modifier.fillMaxSize().padding(horizontal = 12.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        BrandMark(Modifier.size(68.dp))
+        Spacer(Modifier.height(20.dp))
+        Text(title, color = PrimaryText, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, letterSpacing = (-0.4).sp)
+        Text(subtitle, color = MutedText, modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), textAlign = TextAlign.Center, fontSize = 14.sp, lineHeight = 20.sp)
+        if (action != null) {
+            Spacer(Modifier.height(6.dp))
+            OutlinedButton(onClick = action, shape = ButtonShape, border = OutlineBorder, colors = outlinedColors()) { Text("Back to home") }
+        }
     }
 }
 
