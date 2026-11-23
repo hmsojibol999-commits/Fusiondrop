@@ -476,7 +476,7 @@ private fun TransferModeCard(
                     Text(title, color = PrimaryText, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     if (featured) {
                         Spacer(Modifier.width(8.dp))
-                        Surface(modifier = Modifier.widthIn(min = 48.dp), shape = CircleShape, color = Cyan.copy(alpha = 0.16f)) {
+                        Surface(modifier = Modifier.width(48.dp), shape = CircleShape, color = Cyan.copy(alpha = 0.16f)) {
                             Text("NEW", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), color = Color(0xFF7DE8EF), fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 0.5.sp, maxLines = 1, softWrap = false)
                         }
                     }
