@@ -17,5 +17,6 @@
  <application android:allowBackup="false" android:label="FusionDrop" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:theme="@style/Theme.FusionDrop.Splash" android:supportsRtl="true">
   <activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
   <service android:name=".transfer.TransferService" android:exported="false" android:foregroundServiceType="dataSync"/>
+  <service android:name=".linkshare.LinkShareService" android:exported="false" android:foregroundServiceType="dataSync"/>
  </application>
 </manifest>

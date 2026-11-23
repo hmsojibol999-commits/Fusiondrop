@@ -1,0 +1,5 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/fusiondrop_splash_vector">
+    <target android:name="orbit" android:animation="@animator/splash_orbit" />
+    <target android:name="pulse" android:animation="@animator/splash_pulse" />
+</animated-vector>

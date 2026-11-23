@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="432dp"
+    android:height="432dp"
+    android:viewportWidth="432"
+    android:viewportHeight="432">
+    <path android:fillColor="#0D1B31" android:pathData="M216,16 A200,200 0,1 1,216,416 A200,200 0,1 1,216,16 Z" />
+    <path android:fillColor="#00000000" android:strokeColor="#1F3D60" android:strokeWidth="10" android:pathData="M216,38 A178,178 0,1 1,216,394 A178,178 0,1 1,216,38" />
+    <group android:name="orbit" android:pivotX="216" android:pivotY="216">
+        <path android:fillColor="#00000000" android:strokeColor="#29D2E6" android:strokeWidth="15" android:strokeLineCap="round" android:pathData="M216,43 A173,173 0,0 1,364 127" />
+        <path android:fillColor="#00000000" android:strokeColor="#3978F6" android:strokeWidth="15" android:strokeLineCap="round" android:pathData="M216,389 A173,173 0,0 1,68 305" />
+    </group>
+    <group android:name="pulse" android:pivotX="216" android:pivotY="216">
+        <path android:fillColor="#3978F6" android:pathData="M73,183 L157,183 L157,139 L238,216 L157,293 L157,249 L73,249 Z" />
+        <path android:fillColor="#24CDE0" android:pathData="M359,183 L275,183 L275,139 L194,216 L275,293 L275,249 L359,249 Z" />
+        <path android:fillColor="#F3F7FF" android:pathData="M216,183 L247,216 L216,249 L185,216 Z" />
+    </group>
+</vector>

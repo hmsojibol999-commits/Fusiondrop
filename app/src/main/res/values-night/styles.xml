@@ -1,7 +1,17 @@
 <resources>
+    <style name="Theme.FusionDrop" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowBackground">#080E1A</item>
+        <item name="android:statusBarColor">#080E1A</item>
+        <item name="android:navigationBarColor">#080E1A</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:colorAccent">#24CDE0</item>
+    </style>
     <style name="Theme.FusionDrop.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#0B1220</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-        <item name="postSplashScreenTheme">@android:style/Theme.Material.NoActionBar</item>
+        <item name="windowSplashScreenBackground">#080E1A</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/avd_fusiondrop_splash</item>
+        <item name="windowSplashScreenAnimationDuration">900</item>
+        <item name="postSplashScreenTheme">@style/Theme.FusionDrop</item>
     </style>
 </resources>
